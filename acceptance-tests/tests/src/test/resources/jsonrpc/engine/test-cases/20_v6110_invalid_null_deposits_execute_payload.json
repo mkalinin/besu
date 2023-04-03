@@ -29,8 +29,9 @@
             "amount": "0x2"
           }
         ],
-        "blockNumber": "0x2",
-        "blockHash": "0x4f88d512a0045bc6d447ba74a18eac0ed2ebb8d9faca325f5f55b2ca84be0705",
+        "deposits": null,
+        "blockNumber": "0x3",
+        "blockHash": "0x1475ca311179652e44b10b7e2d7b72f3708f3201f8d729880a83f3eb397910e8",
         "receiptsRoot": "0x56e81f171bcc55a6ff8345e692c0f86e5b48e01b996cadc001622fb5e363b421"
       }
     ],
@@ -39,10 +40,9 @@
   "response": {
     "jsonrpc": "2.0",
     "id": 67,
-    "result": {
-      "status": "VALID",
-      "latestValidHash": "0x4f88d512a0045bc6d447ba74a18eac0ed2ebb8d9faca325f5f55b2ca84be0705",
-      "validationError": null
+    "error": {
+      "code": -32602,
+      "message": "Invalid params"
     }
   },
   "statusCode": 200
