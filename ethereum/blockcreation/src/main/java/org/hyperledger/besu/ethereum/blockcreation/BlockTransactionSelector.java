@@ -452,23 +452,23 @@ public class BlockTransactionSelector {
   Responsible for updating the state maintained between transaction validation (i.e. receipts,
   cumulative gas, world state root hash.).
    */
-  private void updateTransactionResultTracking(
-      final Transaction transaction, final TransactionProcessingResult result) {
-
-    final long gasUsedByTransaction = transaction.getGasLimit() - result.getGasRemaining();
-
-    final long cumulativeGasUsed =
-        transactionSelectionResult.getCumulativeGasUsed() + gasUsedByTransaction;
-
-    final long dataGasUsed = gasCalculator.dataGasCost(transaction.getBlobCount());
-
-    transactionSelectionResult.update(
-        transaction,
-        transactionReceiptFactory.create(
-            transaction.getType(), result, worldState, cumulativeGasUsed),
-        gasUsedByTransaction,
-        dataGasUsed);
-  }
+//  private void updateTransactionResultTracking(
+//      final Transaction transaction, final TransactionProcessingResult result) {
+//
+//    final long gasUsedByTransaction = transaction.getGasLimit() - result.getGasRemaining();
+//
+//    final long cumulativeGasUsed =
+//        transactionSelectionResults.getCumulativeGasUsed() + gasUsedByTransaction;
+//
+//    final long dataGasUsed = gasCalculator.dataGasCost(transaction.getBlobCount());
+//
+//    transactionSelectionResults.update(
+//        transaction,
+//        transactionReceiptFactory.create(
+//            transaction.getType(), result, worldState, cumulativeGasUsed),
+//        gasUsedByTransaction,
+//        dataGasUsed);
+//  }
 
   private boolean isIncorrectNonce(final ValidationResult<TransactionInvalidReason> result) {
     return result.getInvalidReason().equals(TransactionInvalidReason.NONCE_TOO_HIGH);
