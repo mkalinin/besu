@@ -23,6 +23,7 @@ import org.hyperledger.besu.ethereum.mainnet.ProtocolSchedule;
 import org.hyperledger.besu.ethereum.mainnet.ProtocolSpec;
 
 public class DepositsValidatorProvider {
+
   static DepositsValidator getDepositsValidator(
       final ProtocolSchedule protocolSchedule, final long blockTimestamp, final long blockNumber) {
 
@@ -34,9 +35,19 @@ public class DepositsValidatorProvider {
     return getDepositsValidator(protocolSchedule.getByBlockHeader(blockHeader));
   }
 
+  static DepositsValidator getDepositsValidator(
+      final ProtocolSchedule protocolSchedule,
+      final BlockHeader parentBlockHeader,
+      final long timestampForNextBlock) {
+
+    return getDepositsValidator(
+        protocolSchedule.getForNextBlockHeader(parentBlockHeader, timestampForNextBlock));
+  }
+
   private static DepositsValidator getDepositsValidator(final ProtocolSpec protocolSchedule) {
     return Optional.ofNullable(protocolSchedule)
         .map(ProtocolSpec::getDepositsValidator)
         .orElseGet(DepositsValidator.ProhibitedDeposits::new);
   }
+
 }
