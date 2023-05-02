@@ -49,5 +49,4 @@ public class DepositsValidatorProvider {
         .map(ProtocolSpec::getDepositsValidator)
         .orElseGet(DepositsValidator.ProhibitedDeposits::new);
   }
-
 }
