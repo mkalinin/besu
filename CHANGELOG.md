@@ -14,6 +14,7 @@
 - New option to send SNI header in TLS ClientHello message [#5439](https://github.com/hyperledger/besu/pull/5439)
 - Early access - layered transaction pool implementation [#5290](https://github.com/hyperledger/besu/pull/5290)
 - New RPC method `debug_getRawReceipts`
+- Added In-Protocol Deposit prototype (EIP-6110) in the experimental eip. [#5005](https://github.com/hyperledger/besu/pull/5055) [#5295](https://github.com/hyperledger/besu/pull/5295)
 
 ### Bug Fixes
 - Fix eth_feeHistory response for the case in which blockCount is higher than highestBlock requested. [#5397](https://github.com/hyperledger/besu/pull/5397)
