@@ -14,35 +14,34 @@
  */
 package org.hyperledger.besu.ethereum.api.jsonrpc.internal.results;
 
+import com.fasterxml.jackson.annotation.JsonGetter;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+import org.apache.tuweni.bytes.Bytes32;
 import org.hyperledger.besu.ethereum.api.jsonrpc.internal.parameters.DepositParameter;
 import org.hyperledger.besu.ethereum.api.jsonrpc.internal.parameters.WithdrawalParameter;
 import org.hyperledger.besu.ethereum.core.BlockHeader;
 import org.hyperledger.besu.ethereum.core.Deposit;
 import org.hyperledger.besu.ethereum.core.Withdrawal;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
-
-import com.fasterxml.jackson.annotation.JsonGetter;
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import org.apache.tuweni.bytes.Bytes32;
-
 @JsonPropertyOrder({
   "executionPayload",
   "blockValue",
 })
-public class EngineGetPayloadResultV2 {
+public class EngineGetPayloadResultV6110 {
   protected final PayloadResult executionPayload;
   private final String blockValue;
 
-  public EngineGetPayloadResultV2(
+  public EngineGetPayloadResultV6110(
       final BlockHeader header,
       final List<String> transactions,
       final Optional<List<Withdrawal>> withdrawals,
+      final Optional<List<Deposit>> deposits,
       final String blockValue) {
-    this.executionPayload = new PayloadResult(header, transactions, withdrawals);
+    this.executionPayload = new PayloadResult(header, transactions, withdrawals, deposits);
     this.blockValue = blockValue;
   }
 
@@ -71,13 +70,18 @@ public class EngineGetPayloadResultV2 {
     private final String timestamp;
     private final String extraData;
     private final String baseFeePerGas;
+
+    private final String excessDataGas;
+
     protected final List<String> transactions;
     private final List<WithdrawalParameter> withdrawals;
+    private final List<DepositParameter> deposits;
 
     public PayloadResult(
         final BlockHeader header,
         final List<String> transactions,
-        final Optional<List<Withdrawal>> withdrawals) {
+        final Optional<List<Withdrawal>> withdrawals,
+        final Optional<List<Deposit>> deposits) {
       this.blockNumber = Quantity.create(header.getNumber());
       this.blockHash = header.getHash().toString();
       this.parentHash = header.getParentHash().toString();
@@ -86,6 +90,7 @@ public class EngineGetPayloadResultV2 {
       this.receiptsRoot = header.getReceiptsRoot().toString();
       this.extraData = header.getExtraData().toString();
       this.baseFeePerGas = header.getBaseFee().map(Quantity::create).orElse(null);
+      this.excessDataGas = header.getExcessDataGas().map(Quantity::create).orElse(null);
       this.gasLimit = Quantity.create(header.getGasLimit());
       this.gasUsed = Quantity.create(header.getGasUsed());
       this.timestamp = Quantity.create(header.getTimestamp());
@@ -99,6 +104,11 @@ public class EngineGetPayloadResultV2 {
                       ws.stream()
                           .map(WithdrawalParameter::fromWithdrawal)
                           .collect(Collectors.toList()))
+              .orElse(null);
+      this.deposits =
+          deposits
+              .map(
+                  ds -> ds.stream().map(DepositParameter::fromDeposit).collect(Collectors.toList()))
               .orElse(null);
     }
 
@@ -176,6 +186,16 @@ public class EngineGetPayloadResultV2 {
     @JsonInclude(JsonInclude.Include.NON_NULL)
     public String getFeeRecipient() {
       return feeRecipient;
+    }
+
+    @JsonGetter(value = "excessDataGas")
+    public String getExcessDataGas() {
+      return excessDataGas;
+    }
+
+    @JsonGetter(value = "deposits")
+    public List<DepositParameter> getDeposits() {
+      return deposits;
     }
   }
 }
