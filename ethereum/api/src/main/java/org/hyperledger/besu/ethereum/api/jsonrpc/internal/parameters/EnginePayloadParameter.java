@@ -47,7 +47,7 @@ public class EnginePayloadParameter {
   private final LogsBloomFilter logsBloom;
   private final List<String> transactions;
   private final List<WithdrawalParameter> withdrawals;
-  private final List<DepositParameter> deposits;
+  private final List<DepositReceiptParameter> depositReceipts;
 
   private final String excessDataGas;
 
@@ -69,7 +69,7 @@ public class EnginePayloadParameter {
       @JsonProperty("transactions") final List<String> transactions,
       @JsonProperty("withdrawals") final List<WithdrawalParameter> withdrawals,
       @JsonProperty("excessDataGas") final String excessDataGas,
-      @JsonProperty("deposits") final List<DepositParameter> deposits) {
+      @JsonProperty("depositReceipts") final List<DepositReceiptParameter> depositReceipts) {
     this.blockHash = blockHash;
     this.parentHash = parentHash;
     this.feeRecipient = feeRecipient;
@@ -86,7 +86,7 @@ public class EnginePayloadParameter {
     this.transactions = transactions;
     this.withdrawals = withdrawals;
     this.excessDataGas = excessDataGas;
-    this.deposits = deposits;
+    this.depositReceipts = depositReceipts;
   }
 
   public Hash getBlockHash() {
@@ -153,7 +153,7 @@ public class EnginePayloadParameter {
     return excessDataGas;
   }
 
-  public List<DepositParameter> getDeposits() {
-    return deposits;
+  public List<DepositReceiptParameter> getDepositReceipts() {
+    return depositReceipts;
   }
 }

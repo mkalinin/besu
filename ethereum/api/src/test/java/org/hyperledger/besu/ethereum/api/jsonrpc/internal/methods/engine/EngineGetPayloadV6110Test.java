@@ -81,7 +81,7 @@ public class EngineGetPayloadV6110Test extends AbstractEngineGetPayloadTest {
             r -> {
               assertThat(r.getResult()).isInstanceOf(EngineGetPayloadResultV6110.class);
               final EngineGetPayloadResultV6110 res = (EngineGetPayloadResultV6110) r.getResult();
-              assertThat(res.getExecutionPayload().getDeposits()).isNotNull();
+              assertThat(res.getExecutionPayload().getDepositReceipts()).isNotNull();
               assertThat(res.getExecutionPayload().getHash())
                   .isEqualTo(mockHeader.getHash().toString());
               assertThat(res.getBlockValue()).isEqualTo(Quantity.create(0));

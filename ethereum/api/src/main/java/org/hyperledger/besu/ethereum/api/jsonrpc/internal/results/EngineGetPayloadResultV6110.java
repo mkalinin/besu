@@ -21,7 +21,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import org.apache.tuweni.bytes.Bytes32;
-import org.hyperledger.besu.ethereum.api.jsonrpc.internal.parameters.DepositParameter;
+import org.hyperledger.besu.ethereum.api.jsonrpc.internal.parameters.DepositReceiptParameter;
 import org.hyperledger.besu.ethereum.api.jsonrpc.internal.parameters.WithdrawalParameter;
 import org.hyperledger.besu.ethereum.core.BlockHeader;
 import org.hyperledger.besu.ethereum.core.Deposit;
@@ -75,13 +75,13 @@ public class EngineGetPayloadResultV6110 {
 
     protected final List<String> transactions;
     private final List<WithdrawalParameter> withdrawals;
-    private final List<DepositParameter> deposits;
+    private final List<DepositReceiptParameter> depositReceipts;
 
     public PayloadResult(
         final BlockHeader header,
         final List<String> transactions,
         final Optional<List<Withdrawal>> withdrawals,
-        final Optional<List<Deposit>> deposits) {
+        final Optional<List<Deposit>> depositReceipts) {
       this.blockNumber = Quantity.create(header.getNumber());
       this.blockHash = header.getHash().toString();
       this.parentHash = header.getParentHash().toString();
@@ -105,10 +105,10 @@ public class EngineGetPayloadResultV6110 {
                           .map(WithdrawalParameter::fromWithdrawal)
                           .collect(Collectors.toList()))
               .orElse(null);
-      this.deposits =
-          deposits
+      this.depositReceipts =
+          depositReceipts
               .map(
-                  ds -> ds.stream().map(DepositParameter::fromDeposit).collect(Collectors.toList()))
+                  ds -> ds.stream().map(DepositReceiptParameter::fromDeposit).collect(Collectors.toList()))
               .orElse(null);
     }
 
@@ -193,9 +193,9 @@ public class EngineGetPayloadResultV6110 {
       return excessDataGas;
     }
 
-    @JsonGetter(value = "deposits")
-    public List<DepositParameter> getDeposits() {
-      return deposits;
+    @JsonGetter(value = "depositReceipts")
+    public List<DepositReceiptParameter> getDepositReceipts() {
+      return depositReceipts;
     }
   }
 }

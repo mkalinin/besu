@@ -28,7 +28,7 @@ import org.apache.tuweni.bytes.Bytes32;
 import org.apache.tuweni.units.bigints.UInt64;
 import org.junit.Test;
 
-public class DepositParameterTest {
+public class DepositReceiptParameterTest {
 
   @Test
   public void toDeposit() {
@@ -58,6 +58,6 @@ public class DepositParameterTest {
                 "0xa889db8300194050a2636c92a95bc7160515867614b7971a9500cdb62f9c0890217d2901c3241f86fac029428fc106930606154bd9e406d7588934a5f15b837180b17194d6e44bd6de23e43b163dfe12e369dcc75a3852cd997963f158217eb5"),
             UInt64.ONE);
 
-    assertThat(DepositParameter.fromDeposit(deposit)).isEqualTo(DEPOSIT_PARAM_1);
+    assertThat(DepositReceiptParameter.fromDeposit(deposit)).isEqualTo(DEPOSIT_PARAM_1);
   }
 }

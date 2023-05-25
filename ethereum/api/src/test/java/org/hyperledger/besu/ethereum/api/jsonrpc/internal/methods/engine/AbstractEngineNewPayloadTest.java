@@ -43,7 +43,7 @@ import org.hyperledger.besu.ethereum.api.jsonrpc.RpcMethod;
 import org.hyperledger.besu.ethereum.api.jsonrpc.internal.JsonRpcRequest;
 import org.hyperledger.besu.ethereum.api.jsonrpc.internal.JsonRpcRequestContext;
 import org.hyperledger.besu.ethereum.api.jsonrpc.internal.methods.ExecutionEngineJsonRpcMethod;
-import org.hyperledger.besu.ethereum.api.jsonrpc.internal.parameters.DepositParameter;
+import org.hyperledger.besu.ethereum.api.jsonrpc.internal.parameters.DepositReceiptParameter;
 import org.hyperledger.besu.ethereum.api.jsonrpc.internal.parameters.EnginePayloadParameter;
 import org.hyperledger.besu.ethereum.api.jsonrpc.internal.parameters.UnsignedLongParameter;
 import org.hyperledger.besu.ethereum.api.jsonrpc.internal.parameters.WithdrawalParameter;
@@ -487,7 +487,7 @@ public abstract class AbstractEngineNewPayloadTest {
 
   @Test
   public void shouldReturnInvalidIfDepositsIsNotNull_WhenDepositsProhibited() {
-    final List<DepositParameter> deposits = List.of();
+    final List<DepositReceiptParameter> deposits = List.of();
     when(protocolSpec.getDepositsValidator())
         .thenReturn(new DepositsValidator.ProhibitedDeposits());
 
@@ -506,7 +506,7 @@ public abstract class AbstractEngineNewPayloadTest {
 
   @Test
   public void shouldReturnValidIfDepositsIsNull_WhenDepositsProhibited() {
-    final List<DepositParameter> deposits = null;
+    final List<DepositReceiptParameter> deposits = null;
     when(protocolSpec.getDepositsValidator())
         .thenReturn(new DepositsValidator.ProhibitedDeposits());
     BlockHeader mockHeader =
@@ -522,7 +522,7 @@ public abstract class AbstractEngineNewPayloadTest {
 
   @Test
   public void shouldReturnInvalidIfDepositsIsNull_WhenDepositsAllowed() {
-    final List<DepositParameter> deposits = null;
+    final List<DepositReceiptParameter> deposits = null;
     when(protocolSpec.getDepositsValidator())
         .thenReturn(new DepositsValidator.AllowedDeposits(depositContractAddress));
 
@@ -540,7 +540,7 @@ public abstract class AbstractEngineNewPayloadTest {
 
   @Test
   public void shouldReturnValidIfDepositsIsNotNull_WhenDepositsAllowed() {
-    final List<DepositParameter> depositsParam = List.of(DEPOSIT_PARAM_1);
+    final List<DepositReceiptParameter> depositsParam = List.of(DEPOSIT_PARAM_1);
     final List<Deposit> deposits = List.of(DEPOSIT_PARAM_1.toDeposit());
     when(protocolSpec.getDepositsValidator())
         .thenReturn(new DepositsValidator.AllowedDeposits(depositContractAddress));
@@ -584,7 +584,7 @@ public abstract class AbstractEngineNewPayloadTest {
       final BlockHeader header,
       final List<String> txs,
       final List<WithdrawalParameter> withdrawals,
-      final List<DepositParameter> deposits) {
+      final List<DepositReceiptParameter> deposits) {
     return new EnginePayloadParameter(
         header.getHash(),
         header.getParentHash(),

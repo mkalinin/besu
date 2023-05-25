@@ -28,7 +28,7 @@ import io.vertx.core.json.JsonObject;
 import org.apache.tuweni.bytes.Bytes32;
 import org.apache.tuweni.units.bigints.UInt64;
 
-public class DepositParameter {
+public class DepositReceiptParameter {
 
   private final String publicKey;
 
@@ -39,7 +39,7 @@ public class DepositParameter {
   private final String index;
 
   @JsonCreator
-  public DepositParameter(
+  public DepositReceiptParameter(
       @JsonProperty("pubkey") final String pubKey,
       @JsonProperty("withdrawalCredentials") final String withdrawalCredentials,
       @JsonProperty("amount") final String amount,
@@ -52,8 +52,8 @@ public class DepositParameter {
     this.index = index;
   }
 
-  public static DepositParameter fromDeposit(final Deposit deposit) {
-    return new DepositParameter(
+  public static DepositReceiptParameter fromDeposit(final Deposit deposit) {
+    return new DepositReceiptParameter(
         deposit.getPublicKey().toString(),
         deposit.getWithdrawalCredentials().toString(),
         deposit.getAmount().toShortHexString(),
@@ -108,7 +108,7 @@ public class DepositParameter {
   public boolean equals(final Object o) {
     if (this == o) return true;
     if (o == null || getClass() != o.getClass()) return false;
-    final DepositParameter that = (DepositParameter) o;
+    final DepositReceiptParameter that = (DepositReceiptParameter) o;
     return Objects.equals(publicKey, that.publicKey)
         && Objects.equals(withdrawalCredentials, that.withdrawalCredentials)
         && Objects.equals(amount, that.amount)
