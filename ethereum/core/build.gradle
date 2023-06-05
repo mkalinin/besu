@@ -27,22 +27,6 @@ jar {
   }
 }
 
-//repositories {
-//  mavenLocal()
-//}
-//
-//sourceControl {
-//  gitRepository("https://github.com/apache/incubator-tuweni.git") {
-//    producesModule("org.apache.tuweni:ssz")
-//  }
-//}
-//
-//
-//includeBuild('tuweni-library') {
-//  dependencySubstitution {
-//    substitute module('org.apache.tuweni:tuweni-ssz') using project(':')
-//  }
-//}
 
 
 dependencies {

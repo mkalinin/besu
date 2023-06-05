@@ -45,21 +45,6 @@ public interface TransactionPriceCalculator {
     };
   }
 
-  static TransactionPriceCalculator dataGas(
-      final int minDataGasPrice,
-      final int dataGasPriceUpdateFraction,
-      final DataGas excessDataGas) {
-    return ((transaction, baseFee) -> {
-      final var dataGasPrice =
-          Wei.of(
-              fakeExponential(
-                  BigInteger.valueOf(minDataGasPrice),
-                  excessDataGas.toBigInteger(),
-                  BigInteger.valueOf(dataGasPriceUpdateFraction)));
-      return dataGasPrice;
-    });
-  }
-
   private static BigInteger fakeExponential(
       final BigInteger factor, final BigInteger numerator, final BigInteger denominator) {
     int i = 1;
@@ -73,5 +58,20 @@ public interface TransactionPriceCalculator {
       ++i;
     }
     return output.divide(denominator);
+  }
+
+  static TransactionPriceCalculator dataGas(
+      final int minDataGasPrice,
+      final int dataGasPriceUpdateFraction,
+      final DataGas excessDataGas) {
+    return ((transaction, baseFee) -> {
+      final var dataGasPrice =
+          Wei.of(
+              fakeExponential(
+                  BigInteger.valueOf(minDataGasPrice),
+                  excessDataGas.toBigInteger(),
+                  BigInteger.valueOf(dataGasPriceUpdateFraction)));
+      return dataGasPrice;
+    });
   }
 }

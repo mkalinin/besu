@@ -60,7 +60,7 @@ public class Block {
     out.startList();
 
     header.writeTo(out);
-    out.writeList(body.getTransactions(), TransactionEncoder::encodeOpaqueBytes);
+    out.writeList(body.getTransactions(), Transaction::writeTo);
     out.writeList(body.getOmmers(), BlockHeader::writeTo);
     body.getWithdrawals().ifPresent(withdrawals -> out.writeList(withdrawals, Withdrawal::writeTo));
     body.getDeposits().ifPresent(deposits -> out.writeList(deposits, Deposit::writeTo));

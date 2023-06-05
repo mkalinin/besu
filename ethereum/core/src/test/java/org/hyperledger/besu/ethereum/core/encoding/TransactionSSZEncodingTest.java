@@ -118,7 +118,7 @@ public class TransactionSSZEncodingTest {
     assertThat(transaction.getTo()).hasValue(Address.fromHexString(input.getTo()));
     assertThat(transaction.getGasLimit()).isEqualTo(Long.parseLong(input.getGasLimit()));
     assertThat(transaction.getNonce()).isEqualTo(Long.parseLong(input.getNonce()));
-    final Bytes encodedBytes = TransactionEncoder.encodeOpaqueBytesForNetwork(transaction);
+    final Bytes encodedBytes = TransactionEncoder.encodeOpaqueBytes(transaction);
     assertThat(encodedBytes).isNotNull();
     assertThat(encodedBytes.toHexString()).isEqualTo(rawTransaction);
   }

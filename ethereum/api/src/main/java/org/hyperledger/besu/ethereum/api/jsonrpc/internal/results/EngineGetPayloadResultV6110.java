@@ -27,22 +27,22 @@ import org.hyperledger.besu.ethereum.core.BlockHeader;
 import org.hyperledger.besu.ethereum.core.Deposit;
 import org.hyperledger.besu.ethereum.core.Withdrawal;
 
-@JsonPropertyOrder({
-  "executionPayload",
-  "blockValue",
-})
+@JsonPropertyOrder({"executionPayload", "blockValue", "blobsBundle"})
 public class EngineGetPayloadResultV6110 {
   protected final PayloadResult executionPayload;
   private final String blockValue;
+  private final BlobsBundleV1 blobsBundle;
 
   public EngineGetPayloadResultV6110(
       final BlockHeader header,
       final List<String> transactions,
       final Optional<List<Withdrawal>> withdrawals,
       final Optional<List<Deposit>> deposits,
-      final String blockValue) {
+      final String blockValue,
+      final BlobsBundleV1 blobsBundle) {
     this.executionPayload = new PayloadResult(header, transactions, withdrawals, deposits);
     this.blockValue = blockValue;
+    this.blobsBundle = blobsBundle;
   }
 
   @JsonGetter(value = "executionPayload")
@@ -53,6 +53,11 @@ public class EngineGetPayloadResultV6110 {
   @JsonGetter(value = "blockValue")
   public String getBlockValue() {
     return blockValue;
+  }
+
+  @JsonGetter(value = "blobsBundle")
+  public BlobsBundleV1 getBlobsBundle() {
+    return blobsBundle;
   }
 
   public static class PayloadResult {

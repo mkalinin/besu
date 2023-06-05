@@ -26,19 +26,14 @@ import java.util.List;
 import java.util.Optional;
 
 import org.apache.tuweni.bytes.Bytes;
-import org.apache.tuweni.bytes.Bytes32;
 
 public class TransactionTestFixture {
-  private static final Hash DEFAULT_VERSIONED_HASH =
-      Hash.wrap(
-          Bytes32.wrap(
-              Bytes.concatenate(Bytes.fromHexString("0x01"), Bytes.repeat((byte) 42, 31))));
 
   private TransactionType transactionType = TransactionType.FRONTIER;
 
   private long nonce = 0;
 
-  private Optional<Wei> gasPrice = Optional.empty();
+  private Wei gasPrice = Wei.of(5000);
 
   private long gasLimit = 5000;
 
@@ -53,9 +48,8 @@ public class TransactionTestFixture {
 
   private Optional<Wei> maxPriorityFeePerGas = Optional.empty();
   private Optional<Wei> maxFeePerGas = Optional.empty();
-  private Optional<Wei> maxFeePerDataGas = Optional.empty();
 
-  private Optional<List<AccessListEntry>> accessListEntries = Optional.empty();
+  private List<AccessListEntry> accessList = null;
   private Optional<List<Hash>> versionedHashes = Optional.empty();
 
   public Transaction createTransaction(final KeyPair keys) {
@@ -63,38 +57,19 @@ public class TransactionTestFixture {
     builder
         .type(transactionType)
         .gasLimit(gasLimit)
+        .gasPrice(gasPrice)
         .nonce(nonce)
         .payload(payload)
         .value(value)
-        .sender(sender);
-
-    switch (transactionType) {
-      case FRONTIER:
-        builder.gasPrice(gasPrice.orElse(Wei.of(5000)));
-        break;
-      case ACCESS_LIST:
-        builder.gasPrice(gasPrice.orElse(Wei.of(5000)));
-        builder.accessList(accessListEntries.orElse(List.of()));
-        break;
-      case EIP1559:
-        builder.maxPriorityFeePerGas(maxPriorityFeePerGas.orElse(Wei.of(500)));
-        builder.maxFeePerGas(maxFeePerGas.orElse(Wei.of(5000)));
-        builder.accessList(accessListEntries.orElse(List.of()));
-        break;
-      case BLOB:
-        builder.maxPriorityFeePerGas(maxPriorityFeePerGas.orElse(Wei.of(500)));
-        builder.maxFeePerGas(maxFeePerGas.orElse(Wei.of(5000)));
-        builder.accessList(accessListEntries.orElse(List.of()));
-        builder.maxFeePerDataGas(maxFeePerDataGas.orElse(Wei.ONE));
-        builder.versionedHashes(versionedHashes.orElse(List.of(DEFAULT_VERSIONED_HASH)));
-        break;
-    }
+        .sender(sender)
+        .accessList(accessList);
 
     to.ifPresent(builder::to);
     chainId.ifPresent(builder::chainId);
 
     maxPriorityFeePerGas.ifPresent(builder::maxPriorityFeePerGas);
     maxFeePerGas.ifPresent(builder::maxFeePerGas);
+    versionedHashes.ifPresent(builder::versionedHashes);
 
     return builder.signAndBuild(keys);
   }
@@ -110,7 +85,7 @@ public class TransactionTestFixture {
   }
 
   public TransactionTestFixture gasPrice(final Wei gasPrice) {
-    this.gasPrice = Optional.ofNullable(gasPrice);
+    this.gasPrice = gasPrice;
     return this;
   }
 
@@ -154,18 +129,13 @@ public class TransactionTestFixture {
     return this;
   }
 
-  public TransactionTestFixture maxFeePerDataGas(final Optional<Wei> maxFeePerDataGas) {
-    this.maxFeePerDataGas = maxFeePerDataGas;
+  public TransactionTestFixture accessList(final List<AccessListEntry> accessList) {
+    this.accessList = accessList;
     return this;
   }
 
-  public TransactionTestFixture accessList(final List<AccessListEntry> accessListEntries) {
-    this.accessListEntries = Optional.ofNullable(accessListEntries);
-    return this;
-  }
-
-  public TransactionTestFixture versionedHashes(final List<Hash> versionedHashes) {
-    this.versionedHashes = Optional.ofNullable(versionedHashes);
+  public TransactionTestFixture versionedHashes(final Optional<List<Hash>> versionedHashes) {
+    this.versionedHashes = versionedHashes;
     return this;
   }
 }

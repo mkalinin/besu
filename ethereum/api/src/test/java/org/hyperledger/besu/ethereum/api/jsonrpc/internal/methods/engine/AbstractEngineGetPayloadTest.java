@@ -56,6 +56,7 @@ public abstract class AbstractEngineGetPayloadTest {
 
   @FunctionalInterface
   interface MethodFactory {
+
     AbstractEngineGetPayload create(
         final Vertx vertx,
         final ProtocolContext protocolContext,
@@ -105,14 +106,19 @@ public abstract class AbstractEngineGetPayloadTest {
   protected static final BlockWithReceipts mockBlockWithReceiptsAndDeposits =
       new BlockWithReceipts(mockBlockWithDeposits, Collections.emptyList());
 
-  @Mock private ProtocolContext protocolContext;
+  @Mock
+  private ProtocolContext protocolContext;
 
-  @Mock protected MergeContext mergeContext;
-  @Mock private MergeMiningCoordinator mergeMiningCoordinator;
+  @Mock
+  protected MergeContext mergeContext;
+  @Mock
+  private MergeMiningCoordinator mergeMiningCoordinator;
 
-  @Mock protected EngineCallListener engineCallListener;
+  @Mock
+  protected EngineCallListener engineCallListener;
 
-  @Mock protected ProtocolSchedule protocolSchedule;
+  @Mock
+  protected ProtocolSchedule protocolSchedule;
 
   private static final long SHANGHAI_AT = 1337L;
 
@@ -121,7 +127,7 @@ public abstract class AbstractEngineGetPayloadTest {
     when(mergeContext.retrieveBlockById(mockPid)).thenReturn(Optional.of(mockBlockWithReceipts));
     when(protocolContext.safeConsensusContext(Mockito.any())).thenReturn(Optional.of(mergeContext));
     when(protocolSchedule.hardforkFor(any()))
-        .thenReturn(Optional.of(new ScheduledProtocolSpec.Hardfork("shanghai", SHANGHAI_AT)));
+        .thenReturn(new ScheduledProtocolSpec.Hardfork("shanghai", SHANGHAI_AT));
     this.method =
         methodFactory.create(
             vertx,
@@ -154,6 +160,6 @@ public abstract class AbstractEngineGetPayloadTest {
   protected JsonRpcResponse resp(final String methodName, final PayloadIdentifier pid) {
     return method.response(
         new JsonRpcRequestContext(
-            new JsonRpcRequest("2.0", methodName, new Object[] {pid.serialize()})));
+            new JsonRpcRequest("2.0", methodName, new Object[]{pid.serialize()})));
   }
 }

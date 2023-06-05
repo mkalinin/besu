@@ -12,15 +12,30 @@
  *
  * SPDX-License-Identifier: Apache-2.0
  */
+package org.hyperledger.besu.ethereum.core.blobs;
 
-package org.hyperledger.besu.plugin.data;
+import org.hyperledger.besu.ethereum.rlp.RLPInput;
+import org.hyperledger.besu.ethereum.rlp.RLPOutput;
 
-/** Enum for the transaction selection result */
-public enum TransactionSelectionResult {
-  /** remove transaction from pool and continue block building */
-  DELETE_TRANSACTION_AND_CONTINUE,
-  /** continue block building */
-  CONTINUE,
-  /** stop block building */
-  COMPLETE_OPERATION
+import org.apache.tuweni.bytes.Bytes;
+
+public class KZGCommitment {
+  final Bytes data;
+
+  public KZGCommitment(final Bytes data) {
+    this.data = data;
+  }
+
+  public static KZGCommitment readFrom(final RLPInput input) {
+    final Bytes bytes = input.readBytes();
+    return new KZGCommitment(bytes);
+  }
+
+  public void writeTo(final RLPOutput out) {
+    out.writeBytes(data);
+  }
+
+  public Bytes getData() {
+    return data;
+  }
 }

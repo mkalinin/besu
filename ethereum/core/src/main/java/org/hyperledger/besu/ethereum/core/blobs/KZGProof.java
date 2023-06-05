@@ -12,19 +12,30 @@
  *
  * SPDX-License-Identifier: Apache-2.0
  */
+package org.hyperledger.besu.ethereum.core.blobs;
 
-package org.hyperledger.besu.plugin.services.txselection;
+import org.hyperledger.besu.ethereum.rlp.RLPInput;
+import org.hyperledger.besu.ethereum.rlp.RLPOutput;
 
-import org.hyperledger.besu.plugin.Unstable;
+import org.apache.tuweni.bytes.Bytes;
 
-/** Interface for a factory that creates transaction selectors */
-@Unstable
-public interface TransactionSelectorFactory {
+public class KZGProof {
+  final Bytes data;
 
-  /**
-   * Create a transaction selector
-   *
-   * @return the transaction selector
-   */
-  TransactionSelector create();
+  public KZGProof(final Bytes data) {
+    this.data = data;
+  }
+
+  public static KZGProof readFrom(final RLPInput input) {
+    final Bytes bytes = input.readBytes();
+    return new KZGProof(bytes);
+  }
+
+  public void writeTo(final RLPOutput out) {
+    out.writeBytes(data);
+  }
+
+  public Bytes getData() {
+    return data;
+  }
 }

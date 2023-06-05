@@ -15,7 +15,6 @@
 package org.hyperledger.besu.ethereum.api.jsonrpc.internal.methods.engine;
 
 import io.vertx.core.Vertx;
-import java.util.Optional;
 import org.hyperledger.besu.consensus.merge.blockcreation.MergeMiningCoordinator;
 import org.hyperledger.besu.consensus.merge.blockcreation.PayloadIdentifier;
 import org.hyperledger.besu.ethereum.ProtocolContext;
@@ -35,9 +34,9 @@ import org.slf4j.LoggerFactory;
 public class EngineGetPayloadV6110 extends AbstractEngineGetPayload {
 
   private static final Logger LOG = LoggerFactory.getLogger(EngineGetPayloadV6110.class);
-  private final Optional<ScheduledProtocolSpec.Hardfork> shanghai;
-  private final Optional<ScheduledProtocolSpec.Hardfork> cancun;
-  private final Optional<ScheduledProtocolSpec.Hardfork> experimentalEips;
+  private final ScheduledProtocolSpec.Hardfork shanghai;
+  private final ScheduledProtocolSpec.Hardfork cancun;
+  private final ScheduledProtocolSpec.Hardfork experimentalEips;
 
   public EngineGetPayloadV6110(
       final Vertx vertx,
@@ -73,15 +72,15 @@ public class EngineGetPayloadV6110 extends AbstractEngineGetPayload {
     try {
       long builtAt = blockWithReceipts.getHeader().getTimestamp();
 
-      if (beforeShanghai(builtAt)) {
+      if (builtAt < this.shanghai.milestone()) {
         return new JsonRpcSuccessResponse(
             request.getRequest().getId(),
             blockResultFactory.payloadTransactionCompleteV1(blockWithReceipts.getBlock()));
-      } else if (duringShanghai(builtAt)) {
+      } else if (builtAt >= this.shanghai.milestone() && builtAt < this.cancun.milestone()) {
         return new JsonRpcSuccessResponse(
             request.getRequest().getId(),
             blockResultFactory.payloadTransactionCompleteV2(blockWithReceipts));
-      } else if (duringCancun(builtAt)) {
+      } else if (builtAt >= this.cancun.milestone() && builtAt < this.experimentalEips.milestone()) {
         return new JsonRpcSuccessResponse(
             request.getRequest().getId(),
             blockResultFactory.payloadTransactionCompleteV3(blockWithReceipts));
@@ -95,23 +94,5 @@ public class EngineGetPayloadV6110 extends AbstractEngineGetPayload {
       LOG.error("configuration error, can't call V6110 endpoint with non-default protocol schedule");
       return new JsonRpcErrorResponse(request.getRequest().getId(), JsonRpcError.INTERNAL_ERROR);
     }
-  }
-
-  private boolean duringCancun(final long builtAt) {
-    return (this.cancun.isPresent() && builtAt >= this.cancun.get().milestone())
-        && (this.experimentalEips.isEmpty()
-            || (this.experimentalEips.isPresent()
-                && builtAt < this.experimentalEips.get().milestone()));
-  }
-
-  private boolean duringShanghai(final long builtAt) {
-    return (this.shanghai.isPresent() && builtAt >= this.shanghai.get().milestone())
-        && //
-        (this.cancun.isEmpty()
-            || (this.cancun.isPresent() && builtAt < this.cancun.get().milestone()));
-  }
-
-  private boolean beforeShanghai(final long builtAt) {
-    return this.shanghai.isEmpty() || builtAt < this.shanghai.get().milestone();
   }
 }

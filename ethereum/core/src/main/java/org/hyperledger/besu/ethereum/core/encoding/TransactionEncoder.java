@@ -15,13 +15,10 @@
 package org.hyperledger.besu.ethereum.core.encoding;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static org.slf4j.LoggerFactory.getLogger;
 
 import org.hyperledger.besu.datatypes.Address;
-import org.hyperledger.besu.datatypes.Hash;
 import org.hyperledger.besu.datatypes.Wei;
 import org.hyperledger.besu.ethereum.core.Transaction;
-import org.hyperledger.besu.ethereum.core.encoding.ssz.TransactionNetworkPayload;
 import org.hyperledger.besu.ethereum.rlp.RLP;
 import org.hyperledger.besu.ethereum.rlp.RLPOutput;
 import org.hyperledger.besu.evm.AccessListEntry;
@@ -33,113 +30,29 @@ import java.util.Map;
 import java.util.Optional;
 
 import org.apache.tuweni.bytes.Bytes;
-import org.apache.tuweni.ssz.SSZ;
-import org.apache.tuweni.ssz.SSZWriter;
-import org.apache.tuweni.units.bigints.UInt256;
-import org.slf4j.Logger;
 
 public class TransactionEncoder {
-  private static final Logger LOG = getLogger(Encoder.class);
 
   @FunctionalInterface
   interface Encoder {
 
-    Bytes encode(final Transaction transaction);
-
-    static Encoder rlpEncoder(final RLPEncoder rlpEncoder) {
-      return transaction -> RLP.encode(rlpOutput -> rlpEncoder.encode(transaction, rlpOutput));
-    }
-
-    static Encoder sszEncoder(final SSZEncoder sszEncoder) {
-      return transaction -> SSZ.encode(sszOutput -> sszEncoder.encode(transaction, sszOutput));
-    }
-  }
-
-  interface RLPEncoder {
-    void encode(final Transaction transaction, final RLPOutput output);
-  }
-
-  interface SSZEncoder {
-    void encode(final Transaction transaction, final SSZWriter output);
+    void encode(final Transaction transaction, RLPOutput rlpOutput);
   }
 
   private static final Map<TransactionType, Encoder> TYPED_TRANSACTION_ENCODERS =
       Map.of(
-          TransactionType.ACCESS_LIST, Encoder.rlpEncoder(TransactionEncoder::encodeAccessList),
-          TransactionType.EIP1559, Encoder.rlpEncoder(TransactionEncoder::encodeEIP1559),
-          TransactionType.BLOB, Encoder.sszEncoder(TransactionEncoder::encodeWithoutBlobs));
-
-  private static final Map<TransactionType, Encoder> TYPED_TRANSACTION_ENCODERS_FOR_NETWORK =
-      Map.of(
-          TransactionType.ACCESS_LIST, Encoder.rlpEncoder(TransactionEncoder::encodeAccessList),
-          TransactionType.EIP1559, Encoder.rlpEncoder(TransactionEncoder::encodeEIP1559),
-          TransactionType.BLOB, Encoder.sszEncoder(TransactionEncoder::encodeWithBlobs));
-
-  public static void encodeWithBlobs(final Transaction transaction, final SSZWriter rlpOutput) {
-    LOG.trace("Encoding transaction with blobs {}", transaction);
-    var payload = new TransactionNetworkPayload();
-    var blobsWithCommitments = transaction.getBlobsWithCommitments();
-    if (blobsWithCommitments.isPresent()) {
-      payload.setBlobs(blobsWithCommitments.get().blobs);
-      payload.setKzgProof(blobsWithCommitments.get().kzgProof);
-      payload.setKzgCommitments(blobsWithCommitments.get().kzgCommitments);
-    }
-
-    var signedBlobTransaction = payload.getSignedBlobTransaction();
-    populatedSignedBlobTransaction(transaction, signedBlobTransaction);
-
-    payload.writeTo(rlpOutput);
-  }
-
-  public static void encodeWithoutBlobs(final Transaction transaction, final SSZWriter rlpOutput) {
-    LOG.trace("Encoding transaction without blobs {}", transaction);
-    var signedBlobTransaction = new TransactionNetworkPayload.SingedBlobTransaction();
-    populatedSignedBlobTransaction(transaction, signedBlobTransaction);
-    signedBlobTransaction.writeTo(rlpOutput);
-  }
-
-  private static void populatedSignedBlobTransaction(
-      final Transaction transaction,
-      final TransactionNetworkPayload.SingedBlobTransaction signedBlobTransaction) {
-    var signature = signedBlobTransaction.getSignature();
-    signature.setR(UInt256.valueOf(transaction.getSignature().getR()));
-    signature.setS(UInt256.valueOf(transaction.getSignature().getS()));
-    signature.setParity(transaction.getSignature().getRecId() == 1);
-
-    var blobTransaction = signedBlobTransaction.getMessage();
-
-    blobTransaction.setChainId(UInt256.valueOf(transaction.getChainId().orElseThrow()));
-    blobTransaction.setNonce(transaction.getNonce());
-    blobTransaction.setMaxPriorityFeePerGas(
-        transaction.getMaxPriorityFeePerGas().orElseThrow().toUInt256());
-    blobTransaction.setMaxFeePerGas(transaction.getMaxFeePerGas().orElseThrow().toUInt256());
-    blobTransaction.setGas(transaction.getGasLimit());
-    blobTransaction.setAddress(transaction.getTo());
-    blobTransaction.setValue(transaction.getValue().toUInt256());
-    blobTransaction.setData(transaction.getPayload());
-    transaction
-        .getAccessList()
-        .ifPresent(
-            accessListEntries -> {
-              var accessList = blobTransaction.getAccessList();
-              accessListEntries.forEach(
-                  accessListEntry -> {
-                    var tuple = new TransactionNetworkPayload.SingedBlobTransaction.AccessTuple();
-                    tuple.setAddress(accessListEntry.getAddress());
-                    tuple.setStorageKeys(accessListEntry.getStorageKeys());
-                    accessList.add(tuple);
-                  });
-            });
-    blobTransaction.setMaxFeePerDataGas(
-        transaction.getMaxFeePerDataGas().orElseThrow().toUInt256());
-    blobTransaction.setBlobVersionedHashes(transaction.getVersionedHashes().orElseThrow());
-  }
+          TransactionType.ACCESS_LIST,
+          TransactionEncoder::encodeAccessList,
+          TransactionType.EIP1559,
+          TransactionEncoder::encodeEIP1559,
+          TransactionType.BLOB,
+          BlobTransactionEncoder::encodeEIP4844);
 
   public static void encodeForWire(final Transaction transaction, final RLPOutput rlpOutput) {
     final TransactionType transactionType =
         checkNotNull(
             transaction.getType(), "Transaction type for %s was not specified.", transaction);
-    encodeForWire(transactionType, encodeOpaqueBytesForNetwork(transaction), rlpOutput);
+    encodeForWire(transactionType, encodeOpaqueBytes(transaction), rlpOutput);
   }
 
   public static void encodeForWire(
@@ -171,26 +84,8 @@ public class TransactionEncoder {
               TYPED_TRANSACTION_ENCODERS.get(transactionType),
               "Developer Error. A supported transaction type %s has no associated encoding logic",
               transactionType);
-      Bytes encoded = encoder.encode(transaction);
-      Bytes appended = Bytes.concatenate(Bytes.of(transactionType.getSerializedType()), encoded);
-      return appended;
-    }
-  }
-
-  public static Bytes encodeOpaqueBytesForNetwork(final Transaction transaction) {
-    final TransactionType transactionType =
-        checkNotNull(
-            transaction.getType(), "Transaction type for %s was not specified.", transaction);
-    if (TransactionType.FRONTIER.equals(transactionType)) {
-      return RLP.encode(rlpOutput -> encodeFrontier(transaction, rlpOutput));
-    } else {
-      final Encoder encoder =
-          checkNotNull(
-              TYPED_TRANSACTION_ENCODERS_FOR_NETWORK.get(transactionType),
-              "Developer Error. A supported transaction type %s has no associated encoding logic",
-              transactionType);
-      return Bytes.concatenate(
-          Bytes.of(transactionType.getSerializedType()), encoder.encode(transaction));
+      return Bytes.concatenate(Bytes.of(transactionType.getSerializedType()),
+          RLP.encode(rlpOutput -> encoder.encode(transaction, rlpOutput)));
     }
   }
 
@@ -298,17 +193,12 @@ public class TransactionEncoder {
     }
   }
 
-  public static void writeBlobVersionedHashes(
-      final RLPOutput rlpOutput, final List<Hash> versionedHashes) {
-    // ToDo 4844: implement
-  }
-
   private static void writeSignatureAndV(final Transaction transaction, final RLPOutput out) {
     out.writeBigIntegerScalar(transaction.getV());
     writeSignature(transaction, out);
   }
 
-  private static void writeSignatureAndRecoveryId(
+  public static void writeSignatureAndRecoveryId(
       final Transaction transaction, final RLPOutput out) {
     out.writeIntScalar(transaction.getSignature().getRecId());
     writeSignature(transaction, out);

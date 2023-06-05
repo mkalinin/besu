@@ -183,8 +183,7 @@ public class MergeCoordinatorTest implements MergeGenesisConfigHelper {
         .when(protocolSchedule)
         .getByBlockHeader(any(BlockHeader.class));
 
-    protocolContext =
-        new ProtocolContext(blockchain, worldStateArchive, mergeContext, Optional.empty());
+    protocolContext = new ProtocolContext(blockchain, worldStateArchive, mergeContext);
     var mutable = worldStateArchive.getMutable();
     genesisState.writeStateTo(mutable);
     mutable.persist(null);
@@ -256,7 +255,6 @@ public class MergeCoordinatorTest implements MergeGenesisConfigHelper {
                       protocolSchedule,
                       this.miningParameters.getMinTransactionGasPrice(),
                       address.or(miningParameters::getCoinbase).orElse(Address.ZERO),
-                      this.miningParameters.getMinBlockOccupancyRatio(),
                       parentHeader,
                       Optional.empty()));
 
