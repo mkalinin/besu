@@ -79,27 +79,27 @@ public class DepositReceiptParameter {
         .put("index", index);
   }
 
-  @JsonGetter
+  @JsonGetter(value = "pubkey")
   public String getPublicKey() {
     return publicKey;
   }
 
-  @JsonGetter
+  @JsonGetter(value = "withdrawalCredentials")
   public String getWithdrawalCredentials() {
     return withdrawalCredentials;
   }
 
-  @JsonGetter
+  @JsonGetter(value = "amount")
   public String getAmount() {
     return amount;
   }
 
-  @JsonGetter
+  @JsonGetter(value = "signature")
   public String getSignature() {
     return signature;
   }
 
-  @JsonGetter
+  @JsonGetter(value = "index")
   public String getIndex() {
     return index;
   }
